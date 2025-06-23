@@ -1521,3 +1521,5 @@
 2025.06.23 22:03:44 WARN  Build server is not auto-connectable.
 Jun 23, 2025 10:05:05 PM org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint notify
 INFO: Unsupported notification method: $/setTrace
+Jun 23, 2025 10:05:36 PM org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint notify
+INFO: Unsupported notification method: $/setTrace
