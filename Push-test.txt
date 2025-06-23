@@ -1,2 +1,4 @@
 Thomas:
 - 1st push from command line.
+
+Edit made in github, testing sending this back to Thomas' local folder
