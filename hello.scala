@@ -1,4 +1,7 @@
 package system
+// readLine import
+import scala.io.StdIn.readLine
+
 // Classes - Files & Folders
 object DirectoryInteractive {
     def main(args: Array[String]): Unit = {
