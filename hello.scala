@@ -1,15 +1,24 @@
-@main def welcome() = println("Welcome to File Explorer")
+package system
 // Classes - Files & Folders
-class File(var FileName: String) {
-    println("README.txt")
+object DirectoryInteractive {
+    def main(args: Array[String]): Unit = {
+        val show = new File()
+        show.FolderName()
+        show.FileName()
+    }
 }
 
-class Folder(var FolderName: String) {
-    println("MyFolder")
-}
-    //val folder1 = Files("MyFolder")
-    //var name: String
-    //var files: [File] =>> [List]
+import system.DirectoryInteractive.main
 
-//var folder = Folder(name: "MyFolder")
-//var file = File(name: "README.txt")
+class Folder {
+    def FolderName(): Unit = {
+        println("MyFolder")
+    }
+}
+
+class File extends Folder {
+    def FileName(): Unit = {
+        println("README.txt")
+    }
+}
+
