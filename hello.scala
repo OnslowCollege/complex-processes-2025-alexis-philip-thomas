@@ -1,5 +1,6 @@
-// readLine import
+// imports
 import scala.io.StdIn.readLine
+import scala.collection.mutable.ListBuffer
 
 // Description of Files & Folders
 trait FolderDetails {
@@ -24,14 +25,15 @@ class File(var name: String, var size: Int) extends FileDetails {
 // Terminal
 object FileSystem
     def main(args: Array[String]): Unit = {
-        var folder1 = Folder("MyFolder", 1)
-        var file1 = File("README.txt", 1)
+        val content = ListBuffer[Any]()
+        content += (Folder("MyFolder", 1))
+        content += (File("README.txt", 1))
         var input: String = ""
         while (input != "end") {
             println("Enter your command (Enter end to quit): ")
             var input = readLine()
             if (input == "ls") {
-                println(folder1)
+                println(s"$content")
             }
             if (input == "end") {
                 println("Ending task")
