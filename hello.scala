@@ -3,6 +3,17 @@ import scala.io.StdIn.readLine
 import scala.collection.mutable.ListBuffer
 
 // Description of Files & Folders
+trait FilesystemNode {
+    var name: String
+    var size: Int
+    var parentNode: FilesystemNode
+}
+
+class Folder extends FilesystemNode {
+    var name: String
+    var size: Int = 1
+    var parentNode: Option[FilesystemNode]
+}
 trait FolderDetails {
     var name: String
     var size: Int
@@ -14,11 +25,11 @@ trait FileDetails {
 }
 
 // Classes - Files & Folders
-class Folder(var name: String, var size: Int) extends FolderDetails {
+case class Folder(var name: String, var size: Int) extends FolderDetails {
     override def toString = s"$name/   (dir - $size KB)"
 }
 
-class File(var name: String, var size: Int) extends FileDetails {
+case class File(var name: String, var size: Int) extends FileDetails {
     override def toString = s"$name    $size KB"
 }
 
