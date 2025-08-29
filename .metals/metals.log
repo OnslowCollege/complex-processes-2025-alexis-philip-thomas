@@ -4164,3 +4164,42 @@ INFO: Unsupported notification method: $/setTrace
 Aug 29, 2025 1:14:43 PM org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint notify
 INFO: Unsupported notification method: $/setTrace
 2025.08.29 13:14:43 INFO  no build target found for C:\Users\Alexis\Documents\SWE\complex-processes-2025-alexis-philip-thomas\hello.scala. Using presentation compiler with project's scala-library version: 3.3.6
+Aug 29, 2025 1:16:13 PM org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint notify
+INFO: Unsupported notification method: $/setTrace
+2025.08.29 13:16:34 INFO  no build target found for C:\Users\Alexis\Documents\SWE\complex-processes-2025-alexis-philip-thomas\hello.scala. Using presentation compiler with project's scala-library version: 3.3.6
+2025.08.29 13:21:05 INFO  Shutting down server
+2025.08.29 13:21:05 INFO  shutting down Metals
+2025.08.29 13:21:05 INFO  Exiting server
+2025.08.29 13:25:12 INFO  tracing is disabled for protocol LSP, to enable tracing of incoming and outgoing JSON messages create an empty file at c:\Users\Alexis\Documents\SWE\complex-processes-2025-alexis-philip-thomas\.metals\lsp.trace.json or C:\Users\Alexis\AppData\Local\scalameta\metals\cache\lsp.trace.json
+2025.08.29 13:25:23 INFO  logging to files C:\Users\Alexis\Documents\SWE\complex-processes-2025-alexis-philip-thomas\.metals\metals.log
+2025.08.29 13:25:23 INFO  Started: Metals version 1.6.2 in folders 'C:\Users\Alexis\Documents\SWE\complex-processes-2025-alexis-philip-thomas' for client Visual Studio Code 1.103.2.
+2025.08.29 13:25:23 INFO  time: initialize in 0.13s
+2025.08.29 13:25:28 INFO  no build target found for C:\Users\Alexis\Documents\SWE\complex-processes-2025-alexis-philip-thomas\hello.scala. Using presentation compiler with project's scala-library version: 3.3.6
+Aug 29, 2025 1:25:42 PM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 2
+2025.08.29 13:25:42 INFO  no build target found for C:\Users\Alexis\Documents\SWE\complex-processes-2025-alexis-philip-thomas\src\main\scala\GUI.scala. Using presentation compiler with project's scala-library version: 3.3.6
+2025.08.29 13:25:42 INFO  no build target found for C:\Users\Alexis\Documents\SWE\complex-processes-2025-alexis-philip-thomas\hello.scala. Using presentation compiler with project's scala-library version: 3.3.6
+2025.08.29 13:25:43 INFO  no build target found for C:\Users\Alexis\Documents\SWE\complex-processes-2025-alexis-philip-thomas\src\main\scala\GUI.scala. Using presentation compiler with project's scala-library version: 3.3.6
+Aug 29, 2025 1:25:43 PM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 16
+Aug 29, 2025 1:25:43 PM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 13
+Aug 29, 2025 1:25:43 PM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 9
+2025.08.29 13:25:43 INFO  no build target found for C:\Users\Alexis\Documents\SWE\complex-processes-2025-alexis-philip-thomas\hello.scala. Using presentation compiler with project's scala-library version: 3.3.6
+2025.08.29 13:25:45 WARN  no build target for: C:\Users\Alexis\Documents\SWE\complex-processes-2025-alexis-philip-thomas\hello.scala
+2025.08.29 13:25:45 INFO  no build target found for C:\Users\Alexis\Documents\SWE\complex-processes-2025-alexis-philip-thomas\hello.scala. Using presentation compiler with project's scala-library version: 3.3.6
+Aug 29, 2025 1:25:45 PM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 17
+2025.08.29 13:25:54 INFO  no build target found for C:\Users\Alexis\Documents\SWE\complex-processes-2025-alexis-philip-thomas\hello.scala. Using presentation compiler with project's scala-library version: 3.3.6
+2025.08.29 13:25:54 WARN  no build target for: C:\Users\Alexis\Documents\SWE\complex-processes-2025-alexis-philip-thomas\hello.scala
+2025.08.29 13:25:54 INFO  no build target found for C:\Users\Alexis\Documents\SWE\complex-processes-2025-alexis-philip-thomas\hello.scala. Using presentation compiler with project's scala-library version: 3.3.6
+2025.08.29 13:25:54 WARN  no build target for: C:\Users\Alexis\Documents\SWE\complex-processes-2025-alexis-philip-thomas\src\main\scala\GUI.scala
+2025.08.29 13:25:56 INFO  no build target found for C:\Users\Alexis\Documents\SWE\complex-processes-2025-alexis-philip-thomas\src\main\scala\GUI.scala. Using presentation compiler with project's scala-library version: 3.3.6
+2025.08.29 13:25:56 INFO  time: code lens generation in 1.88s
+2025.08.29 13:25:57 INFO  time: code lens generation in 2.86s
+2025.08.29 13:25:56 INFO  time: code lens generation in 2.85s
+2025.08.29 13:25:57 INFO  time: code lens generation in 2.86s
+2025.08.29 13:25:57 INFO  no build target found for C:\Users\Alexis\Documents\SWE\complex-processes-2025-alexis-philip-thomas\hello.scala. Using presentation compiler with project's scala-library version: 3.3.6
+Aug 29, 2025 1:30:41 PM org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint notify
+INFO: Unsupported notification method: $/setTrace
