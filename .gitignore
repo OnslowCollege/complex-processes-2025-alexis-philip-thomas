@@ -4,3 +4,5 @@ javafx/
 lib/
 .bsp/
 .scala-build/
+target/
+project/
