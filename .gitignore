@@ -1,2 +1,6 @@
 .metals/
 .vscode/
+javafx/
+lib/
+.bsp/
+.scala-build/
