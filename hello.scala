@@ -1,39 +1,38 @@
-// imports
+// importing readLine
 import scala.io.StdIn.readLine
-import scala.collection.mutable.ListBuffer
 
 // Description of Files & Folders
-trait FolderDetails {
-    var name: String
-    var size: Int
-}
-
-trait FileDetails {
-    var name: String
-    var size: Int
+trait Node {
+    val name: String
 }
 
 // Classes - Files & Folders
-class Folder(var name: String, var size: Int) extends FolderDetails {
-    override def toString = s"$name/   (dir - $size KB)"
+case class Folder(name: String) extends Node {
+    var _children: List[Node] = List.empty
+    def children: List[Node] = _children
+    def addChild(child: Node): Unit = {
+        _children = _children :+ child
+    }
+    override def toString = s"$name/"
 }
 
-class File(var name: String, var size: Int) extends FileDetails {
+case class File(name: String, val size: Int = 1, val parent: Node) extends Node {
+    def getParentFolder: String = parent.name
     override def toString = s"$name    $size KB"
 }
+
+val myFolder =  new Folder("MyFolder")
+val readMe = new File("README.txt", 1, myFolder)
 
 // Terminal
 object FileSystem
     def main(args: Array[String]): Unit = {
-        val content = ListBuffer[Any]()
-        content += (Folder("MyFolder", 1))
-        content += (File("README.txt", 1))
         var input: String = ""
         while (input != "end") {
             println("Enter your command (Enter end to quit): ")
             var input = readLine()
             if (input == "ls") {
-                println(s"$content")
+                println(s"${readMe.getParentFolder}")
             }
             if (input == "end") {
                 println("Ending task")
