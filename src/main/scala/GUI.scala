@@ -20,21 +20,34 @@ class MyApp extends Application {
     val button = new Button("confirm")
 
     button.setOnAction(_ => { 
-      val input = textField.getText.toLowerCase.trim
-      val parts = input.split("\\s+").filter(_.nonEmpty)
+      val input: String = textField.getText.toLowerCase.trim
+      val parts: Array[String] = input.split(" ")
       
-
-      if (parts(0) == "ls") {
-        label.setText("will get back to it")
-      } else  if (parts(0) == "cd") {
-        if (parts(1) == "test") {
-          label2.setText("detected test")
-        } else {
-          label2.setText(s"don't recongnize ${parts(1)}")
-        }
-      } else {
-        label2.setText(s"dont recognize $input")
-      }
+      if parts.size >= 1 then
+        parts(0) match
+          case "ls" =>
+            label2.setText("detected ls")
+          
+          case "cd" =>
+            label2.setText("detected cd")
+          
+          case "mkdir" =>
+            label2.setText("detected mkdir")
+          
+          case "touch" =>
+            label2.setText("detected touch")
+          
+          case "rm" =>
+            label2.setText("detected rm")
+          
+          case "rmdir" =>
+            label2.setText("detected rmdir")
+          
+          case "taskkill" =>
+            label2.setText("detected taskkill")
+          
+          case _ =>
+            label2.setText(s"'{$input}' is not a vaild command type please try again")
     })
 
     val layout = new VBox(10, label, label2, textField, button)
