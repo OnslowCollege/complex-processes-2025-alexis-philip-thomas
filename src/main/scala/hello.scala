@@ -1,11 +1,9 @@
-// importing readLine
+// readLine import
 import scala.io.StdIn.readLine
+import scala.util.{Try, Success, Failure}
 
 // Description of Files & Folders
-// Files & Folders must always have a name
-trait Node {
-    val name: String
-}
+trait Node { val name: String}
 
 // Case Classes
 case class Folder(name: String, children: List[Node] = Nil) extends Node
@@ -33,49 +31,55 @@ def printPath(z: Zipper): String =
                 context. The accumulation of the loop is the new zipper's folder's name at the head of
                 the current accumulation/path, building the path. */
                 loop(Zipper(Folder(parentName, left ::: (z.focus :: right)), rest), z.focus.name :: accumulated)
-            loop(z, Nil).mkString("/")
+    loop(z, Nil).mkString("/")
 
 // Commands
 // Command - ls
 def ls(z: Zipper): Unit =
     z.focus match
         case Folder(_, children) =>
-            children.foreach {
-                case Folder(name, _) => println(s"/$name")
-                case File(name, size) => println(s"name   ${size}KB")
-            }
+            val folders: List[Folder] = children.collect { case d: Folder => d}.sortBy(_.name)
+            val files: List[File] = children.collect { case f: File => f}.sortBy(_.name)
+            folders.foreach(folder =>
+                println(s"<DIR> ${folder.name}"))
+            
+            files.foreach(file =>
+                val paddedOutput = s"${"".padTo(6, ' ')}${file.name.padTo(12, ' ')} ${file.size}KB"
+                println(s"$paddedOutput"))
+            
+            val totalSize: Int = files.map(_.size).sum
+            println(s"\n${folders.size} DIR(S)")
+            println(s"${files.size} FILE(S)")
+            println(s"Total: ${totalSize} KB")
         case _ =>
             None
 
 
+// the shell function. acts on the zipper. to change the shell, redefinite it with a new zipper.
+@annotation.tailrec
+def shell(z: Zipper): Unit = 
+    // input is takken and then split into components
+    val input: String = readLine(s"${printPath(z)}>").trim.toLowerCase
+    val inputparams: Array[String] = input.split(" ")
+
+    if inputparams.size >= 1 then
+        inputparams(0) match
+            case "ls" =>
+                ls(z)
+                shell(z)
+            case "kill" =>
+                println("killed")
+    else
+        shell(z)
+
 // Content - files and folders
-@main
-def run(): Unit =
-    val fileSystemContent = Folder("home", List (
-        Folder("documents", List(
-            File("cv.pdf"),
-            File("data.dat")
-        )),
-        Folder("downloads", List(
-            Folder("msinstaller", List(
-                File("instmsia.exe")
+object Filesystem:
+    def main(args: Array[String]): Unit =
+        val fileSystemContent = Folder("home", List (
+            Folder("MyFolder", List(
+                File("README.txt")
             ))
-        )),
-        Folder("music", List(
-            File("GOLDEN.mp3")
-        ))
-        Folder("photos", List(
-            File("passport.jpg"),
-            File("photoid.png"),
-            Folder("japan2026", List(
-                File("tokyo.png"),
-                File("kyoto.png"),
-                File("miyajima.png")
             ))
-        )),
-        File("autoexec.bat"),
-        File("config.sys"),
-        File("command.com")
-    ))
-    val zipper = Zipper(fileSystem, Nil)
-    shell(zipper)
+
+        val zipper = Zipper(fileSystemContent, Nil)
+        shell(zipper)
