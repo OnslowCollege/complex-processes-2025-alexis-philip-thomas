@@ -54,7 +54,30 @@ def ls(z: Zipper): Unit =
         case _ =>
             None
 
+// command cd 
+def cd(name: String, z: Zipper): Option[Zipper] =
+    z.focus match
+        case Folder(parentName, children) =>
+            val (left, targetAndRight) = children.span(_.name != name)
+            targetAndRight match
+                case (target @ Folder(_, _)) :: right =>
+                    Some(Zipper(target, NodeContext(parentName, left, right) :: z.context))
+                case (target @ File(_, _)) :: _ =>
+                    None
+                case Nil =>
+                    None
+        case _ =>
+            None
 
+
+// update a zipper's focused object
+def updateFocus(z: Zipper, newFocus: Node): Zipper =
+    Zipper(newFocus, z.context)
+
+
+// command - mkdir
+def mkdir(name: String, z: Zipper): Zipper =
+    println("working on it")
 // the shell function. acts on the zipper. to change the shell, redefinite it with a new zipper.
 @annotation.tailrec
 def shell(z: Zipper): Unit = 
@@ -67,6 +90,18 @@ def shell(z: Zipper): Unit =
             case "ls" =>
                 ls(z)
                 shell(z)
+            case "cd" =>
+                if inputparams.size == 2 then
+                    val target: String = inputparams(1)
+                    if (target == "..") then
+                        println("test")
+                    else
+                        cd(target, z) match
+                            case Some(next) =>
+                                shell(next)
+                            case None =>
+                                println("system can't locate path.")
+                                shell(z)
             case "kill" =>
                 println("killed")
     else
@@ -77,9 +112,9 @@ object Filesystem:
     def main(args: Array[String]): Unit =
         val fileSystemContent = Folder("home", List (
             Folder("MyFolder", List(
-                File("README.txt")
+                File("README.txt"))),
+            Folder("testFolder", List(
+                File("testfile.exe")))
             ))
-            ))
-
-        val zipper = Zipper(fileSystemContent, Nil)
-        shell(zipper)
+            val zipper = Zipper(fileSystemContent, Nil)
+            shell(zipper)
