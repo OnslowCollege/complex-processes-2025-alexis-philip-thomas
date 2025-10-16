@@ -69,19 +69,66 @@ def cd(name: String, z: Zipper): Option[Zipper] =
         case _ =>
             None
 
+// cd up the chain
+def cdUp(z: Zipper): Option[Zipper] =
+    z.context match
+        case NodeContext(parentName, left, right) :: rest =>
+            val newChildren = left ::: (z.focus :: right)
+            Some(Zipper(Folder(parentName, newChildren), rest))
+        case Nil =>
+            None
 
 // update a zipper's focused object
 def updateFocus(z: Zipper, newFocus: Node): Zipper =
     Zipper(newFocus, z.context)
 
-
 // command - mkdir
-def mkdir(name: String, z: Zipper): Zipper =
-    println("working on it")
+def mkDir(name: String, z: Zipper): Zipper =
+    z.focus match
+        case Folder(parentName, children) =>
+            if (children.exists(_.name == name)) then
+                println(s"'$name' already exists in current folder")
+                z
+            else
+                if name.size >= 1  && name.size <= 12 then
+                    val newFolder: Folder = Folder(name)
+                    val newFocus: Folder = Folder(parentName, children :+ newFolder)
+                    updateFocus(z, newFocus)
+                else
+                    println("name must conform to name conventions")
+                    z
+
+        case File(_, _) =>
+            println(s"'$name' connot contain directories.")
+            z
+
+// command - touch
+def touch(name: String, size: Int, z: Zipper): Zipper =
+    z.focus match
+        case Folder(parentName, children) =>
+            if (children.exists(_.name == name)) then
+                println(s"file '$name' already exist")
+                z
+            else
+                if name.size >= 1 && name.size <= 12 then
+                    if size >= minFileSize && size <= maxFileSize then
+                        val newFile = File(name, size)
+                        val newFocus = Folder(parentName, children :+ newFile)
+                        updateFocus(z, newFocus)
+                    else
+                        println(s"file size be within range (${maxFileSize}KB).")
+                        z
+                else 
+                    println("name must conform to name conventions")
+                    z
+        case File(_, _) =>
+            println(s"'$name' cannot contain files within it.")
+            z
+
 // the shell function. acts on the zipper. to change the shell, redefinite it with a new zipper.
 @annotation.tailrec
 def shell(z: Zipper): Unit = 
-    // input is takken and then split into components
+    // input is taken and then split into components
     val input: String = readLine(s"${printPath(z)}>").trim.toLowerCase
     val inputparams: Array[String] = input.split(" ")
 
@@ -94,7 +141,12 @@ def shell(z: Zipper): Unit =
                 if inputparams.size == 2 then
                     val target: String = inputparams(1)
                     if (target == "..") then
-                        println("test")
+                        cdUp(z) match
+                            case Some(up) =>
+                                shell(up)
+                            case None =>
+                                println("the system connot find the path")
+                                shell(z)
                     else
                         cd(target, z) match
                             case Some(next) =>
@@ -102,18 +154,44 @@ def shell(z: Zipper): Unit =
                             case None =>
                                 println("system can't locate path.")
                                 shell(z)
+            case "mkdir" =>
+                if inputparams.size == 2 then
+                    val target: String = inputparams(1)
+                    shell(mkDir(target, z))
+                else
+                    println("expected input after mkdir: mkdir <FOLDERNAME>")
+                    shell(z)
+            case "touch" =>
+                if inputparams.size == 2 then
+                    val target: String = inputparams(1)
+                    shell(touch(target, minFileSize, z))
+                else if inputparams.size == 3 then
+                    val target: String = inputparams(1)
+                    val modifier: Try[Int] = Try(inputparams(2).toInt)
+                    modifier match
+                        case Success(value) =>
+                            shell(touch(target, value, z))
+                        case Failure(exception) =>
+                            println("file size must be an integer.")
+                            shell(z)
+                else
+                    println("touch expects a maximum of 2 paramters: touch <FILENAME> <FILESIZE>")
             case "kill" =>
                 println("killed")
     else
         shell(z)
 
+// constants
+val minFileSize = 1
+val maxFileSize = 4194304
+
 // Content - files and folders
 object Filesystem:
     def main(args: Array[String]): Unit =
         val fileSystemContent = Folder("home", List (
-            Folder("MyFolder", List(
-                File("README.txt"))),
-            Folder("testFolder", List(
+            Folder("myfolder", List(
+                File("read.txt"))),
+            Folder("testfolder", List(
                 File("testfile.exe")))
             ))
             val zipper = Zipper(fileSystemContent, Nil)
