@@ -1,3 +1,5 @@
+package filesystemBackend
+
 // readLine import
 import scala.io.StdIn.readLine
 import scala.util.{Try, Success, Failure}
@@ -254,7 +256,7 @@ object Filesystem:
             Folder("myfolder", List(
                 File("read.txt"))),
             Folder("testfolder", List(
-                File("testfile.exe")))
+                File("testfile.exe"))),
             ))
             val zipper = Zipper(fileSystemContent, Nil)
             shell(zipper)

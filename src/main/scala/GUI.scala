@@ -1,8 +1,12 @@
 import javafx.application.Application
 import javafx.stage.Stage
 import javafx.scene.Scene
-import javafx.scene.control.{Button, Label, TextField}
-import javafx.scene.layout.VBox
+import javafx.scene.control._
+import javafx.scene.layout._
+import javafx.geometry.Insets
+
+import scala.util.{Try, Success, Failure}
+import filesystemBackend._
 
 object Main {
   def main(args: Array[String]): Unit = {
@@ -11,50 +15,84 @@ object Main {
 }
 
 class MyApp extends Application {
-  override def start(stage: Stage): Unit = {
-    val label = new Label("/home")
-    val label2 = new Label("")
-    val textField = new TextField()
-    textField.setPromptText("enter your command")
+  private var state: Zipper = _
+  override def start(mainStage: Stage): Unit = {
+    val fileSystemGui = Folder("home", List (
+      Folder("myfolder", List(
+          File("read.txt"))),
+      Folder("testfolder", List(
+          File("testfile.exe"))),
+    ))
+    state = Zipper(fileSystemGui, Nil)
 
-    val button = new Button("confirm")
+    val pathLabel = Label(printPath(state))
+    val listViewing = ListView[String]()
+    val inputArea = TextField()
+    val outputArea = TextArea()
+    outputArea.setEditable(false)
 
-    button.setOnAction(_ => { 
-      val input: String = textField.getText.toLowerCase.trim
+    def reload(): Unit =
+      pathLabel.setText(printPath(state))
+      listViewing.getItems.clear()
+      state.focus match
+        case Folder(_, children) =>
+          val folders: List[Folder] = children.collect { case d: Folder => d}.sortBy(_.name)
+          val files: List[File] = children.collect { case f: File => f}.sortBy(_.name)
+
+          folders.foreach(folder => listViewing.getItems.add(s"<DIR> ${folder.name}"))
+          files.foreach(file => 
+            val paddedOutput = s"${"".padTo(6, ' ')}${file.name.padTo(12, ' ')} ${file.size}KB" 
+            listViewing.getItems.add(s"$paddedOutput"))
+        case File(_, _) =>
+          None
+        inputArea.clear
+        mainStage.setTitle(printPath(state))
+
+    reload()
+
+    inputArea.setOnAction(_ => { 
+      val input: String = inputArea.getText.toLowerCase.trim
       val parts: Array[String] = input.split(" ")
       
       if parts.size >= 1 then
         parts(0) match
           case "ls" =>
-            label2.setText("detected ls")
-          
+            outputArea.appendText("refreshed.\n")
           case "cd" =>
-            label2.setText("detected cd")
-          
+            if parts.size == 2 then
+              val target: String = parts(1)
+              if target == ".." then
+                cdUp(state) match
+                  case Some(up) =>
+                    state = up
+                  case None =>
+                    outputArea.appendText("the system cannot find the path specified")
+              else
+                cd(target, state) match
+                  case Some(next) =>
+                    state = next
+                  case None =>
+                    outputArea.appendText("the system cannot find the path specified")
           case "mkdir" =>
-            label2.setText("detected mkdir")
-          
-          case "touch" =>
-            label2.setText("detected touch")
-          
-          case "rm" =>
-            label2.setText("detected rm")
-          
-          case "rmdir" =>
-            label2.setText("detected rmdir")
-          
-          case "taskkill" =>
-            label2.setText("detected taskkill")
-          
-          case _ =>
-            label2.setText(s"'{$input}' is not a vaild command type please try again")
+            if inputArea.size == 2 then
+              val target: String = inputArea(1)
+              state = mkdir(target, state)
+            else
+              outputArea.appendText("'mkdir' epects 1 parameter after command: mkdir <FOLDERNAME>")
+        reload()
     })
 
-    val layout = new VBox(10, label, label2, textField, button)
-    val scene = new Scene(layout, 300, 200)
-
-    stage.setTitle("Scala JavaFX App")
-    stage.setScene(scene)
-    stage.show()
-  }
+    val vbox = VBox(
+      10,
+      pathLabel,
+      listViewing,
+      inputArea,
+      Label("output: "),
+      outputArea
+    )
+    vbox.setPadding(Insets(10))
+    mainStage.setTitle(printPath(state))
+    mainStage.setScene(Scene(vbox, 1280, 720))
+    mainStage.show()
+    }
 }

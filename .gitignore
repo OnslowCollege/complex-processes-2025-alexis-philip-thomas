@@ -6,3 +6,4 @@ lib/
 .scala-build/
 target/
 project/
+.bloop/
