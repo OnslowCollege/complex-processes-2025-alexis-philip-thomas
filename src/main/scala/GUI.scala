@@ -22,7 +22,6 @@ class MyApp extends Application {
           File("read.txt"))),
       Folder("testfolder", List(
           File("testfile.exe"))),
-      File("testfile_display.exe")
     ))
     state = Zipper(fileSystemGui, Nil)
 
@@ -59,6 +58,28 @@ class MyApp extends Application {
         parts(0) match
           case "ls" =>
             outputArea.appendText("refreshed.\n")
+          case "cd" =>
+            if parts.size == 2 then
+              val target: String = parts(1)
+              if target == ".." then
+                cdUp(state) match
+                  case Some(up) =>
+                    state = up
+                  case None =>
+                    outputArea.appendText("the system cannot find the path specified")
+              else
+                cd(target, state) match
+                  case Some(next) =>
+                    state = next
+                  case None =>
+                    outputArea.appendText("the system cannot find the path specified")
+          case "mkdir" =>
+            if inputArea.size == 2 then
+              val target: String = inputArea(1)
+              state = mkdir(target, state)
+            else
+              outputArea.appendText("'mkdir' epects 1 parameter after command: mkdir <FOLDERNAME>")
+        reload()
     })
 
     val vbox = VBox(

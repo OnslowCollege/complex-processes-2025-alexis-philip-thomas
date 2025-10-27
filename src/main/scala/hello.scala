@@ -195,7 +195,6 @@ object Filesystem:
                 File("read.txt"))),
             Folder("testfolder", List(
                 File("testfile.exe"))),
-            File("testfile_display.exe")
             ))
             val zipper = Zipper(fileSystemContent, Nil)
             shell(zipper)
