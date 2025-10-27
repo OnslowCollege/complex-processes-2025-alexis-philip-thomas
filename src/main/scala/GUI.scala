@@ -74,11 +74,37 @@ class MyApp extends Application {
                   case None =>
                     outputArea.appendText("the system cannot find the path specified")
           case "mkdir" =>
-            if inputArea.size == 2 then
-              val target: String = inputArea(1)
-              state = mkdir(target, state)
+            if parts.size == 2 then
+              val target: String = parts(1)
+              state = mkDir(target, state)
             else
               outputArea.appendText("'mkdir' epects 1 parameter after command: mkdir <FOLDERNAME>")
+          case "touch" =>
+            if parts.size == 2 then
+              val target: String = parts(1)
+              state = touch(target, minFileSize, state)
+            else if parts.size == 3 then
+              val target: String = parts(1)
+              val modifer: Try[Int] = Try(parts(2).toInt)
+              modifer match
+                case Success(value) =>
+                  state = touch(target, value, state)
+                case Failure(exception) =>
+                  outputArea.appendText("File must be a number")
+            else
+              outputArea.appendText("'touch' expects a max of two parameters: touch <FILENAME> <FILESIZE>\n")
+          case "rm" =>
+            if parts.size == 2 then
+              val target: String = parts(1)
+              state = rm(target, state)
+            else
+              outputArea.appendText("'rm' expects 1 parameter: rm <FILENAME>\n")
+          case "rmdir" =>
+            if parts.size == 2 then
+              val target: String = parts(1)
+              state = rmdir(target, state)
+            else
+              outputArea.appendText("'rmdir' expects 1 parameter: rmdir <FOLDERNAME>\n")
         reload()
     })
 
