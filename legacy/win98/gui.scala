@@ -2,111 +2,100 @@ import javax.swing._
 import java.awt._
 import java.awt.event._
 
+import scala.collection.immutable.List
+
+import filesystemBackend._
+import filesystemBackend.CommandUtils._
 
 object MyApp {
-	
+
+	// Controls/is the focus of the shell. MUST be variable.
+	var state: Zipper = _
+
 	def main(args: Array[String]): Unit = {
+		// Initialise default file system and focus on it.
+		val fileSystemContent = Folder("home", List (
+            Folder("myfolder", List(
+                File("read.txt"))),
+            Folder("testfolder", List(
+                File("testfile.exe"))),
+            File("testfile_display.exe")
+            ))
+		state = Zipper(fileSystemContent, Nil)
 
 
-		// Define the appearance of the window.
-		val frame = new JFrame("Scala Java Swing App")
-		frame.setSize(300, 200)
+		// Define the appearance and behaviour of the window.
+		val frame = new JFrame()
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
-		// frame.setLayout()
-
-		val label = new JLabel("home/")
-
-		val label2 = new JLabel("\n")
-
-		val textField = new JTextField()
-
-		val button = new JButton("confirm")
-
-		val topPanel = new JPanel(new BorderLayout())
-		topPanel.add(label, BorderLayout.NORTH)
-		topPanel.add(label2, BorderLayout.CENTER)
+		frame.setSize(800, 600)
 		
-		val bottomPanel = new JPanel(new BorderLayout())
-		bottomPanel.add(textField, BorderLayout.NORTH)
-		bottomPanel.add(button, BorderLayout.SOUTH)
+		// Components. listViewing requires listModel.
+		val pathLabel = new JLabel(printPath(state))
+		val listModel = new DefaultListModel()
+		val listViewing = new JList(listModel)
+		val inputArea = new JTextField()
+		val outputArea = new JTextArea()
+		outputArea.setEditable(false)
 
-		val midSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topPanel, bottomPanel)
+		// Layout of components.
 
-		midSplit.setDividerSize(0)
+		val topPanel = new JPanel(new BorderLayout(10, 10))
+		topPanel.add(pathLabel, BorderLayout.NORTH)
+		topPanel.add(new JScrollPane(listViewing), BorderLayout.CENTER)
+		topPanel.add(inputArea, BorderLayout.SOUTH)
+		topPanel.setPreferredSize(new Dimension(1280, 450))
 
-		frame.getContentPane().add(midSplit)
+		val bottomPanel = new JPanel(new BorderLayout(10, 10))
+		bottomPanel.add(new JLabel("output:"), BorderLayout.NORTH)
+		bottomPanel.add(new JScrollPane(outputArea), BorderLayout.CENTER)
+
+		val mainSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topPanel, bottomPanel)
+		mainSplit.setDividerSize(0)
+
+		frame.getContentPane().add(mainSplit)
+
+		// Refresh the listview, window title, pathlabel.
+		def reload(): Unit = {
+			pathLabel.setText(printPath(state))
+			listModel.clear()
+			frame.setTitle(printPath(state))
+			state.focus match {
+				case Folder(_, children) =>
+					val folders: List[Folder] = children.collect { case d: Folder => d}.sortBy(_.name)
+					val files: List[File] = children.collect { case f: File => f}.sortBy(_.name)
+
+					folders.foreach { folder =>
+						listModel.addElement("<DIR> " +  folder.name)
+					}
+
+					files.foreach { file =>
+						val paddedOutput = "      " + file.name + " " + file.size + "KB"
+						listModel.addElement(paddedOutput)
+					}
+
+				case File(_, _) =>
+					None
+					// inputArea.clear()
+					
+			}
+		}
+
+		reload()
 
 
-
-		button.addActionListener(new ActionListener() {
+		inputArea.addActionListener(new ActionListener() {
 			def actionPerformed(e: ActionEvent): Unit = {
-				val input: String = textField.getText.toLowerCase.trim
+				val input: String = inputArea.getText.toLowerCase.trim
 				val parts: Array[String] = input.split(" ")
 			
 				if (parts.size >= 1) {
 					parts(0) match {
 						case "ls" =>
-							label2.setText("detected ls")
-						
-						case "cd" =>
-							label2.setText("detected cd")
-						
-						case "mkdir" =>
-							label2.setText("detected mkdir")
-						
-						case "touch" =>
-							label2.setText("detected touch")
-						
-						case "rm" =>
-							label2.setText("detected rm")
-						
-						case "rmdir" =>
-							label2.setText("detected rmdir")
-						
-						case "taskkill" =>
-							label2.setText("detected taskkill")
-						
-						case _ =>
-							label2.setText("'" + input + "' is not a vaild command type please try again")
+							outputArea.append("Refreshed\n")
 					}
 				}
 			}
 		})
-		
-
-		
-
-		
-
-		/* This is redundant from FlowLayout testing.
-		// Vertical alignment panels.
-		val topPanel = new JPanel(new BorderLayout())
-		topPanel.add(label, BorderLayout.NORTH)
-		topPanel.add(label2, BorderLayout.CENTER)
-
-		val bottomPanel = new JPanel(new BorderLayout())
-		bottomPanel.add(textField, BorderLayout.NORTH)
-		bottomPanel.add(button, BorderLayout.CENTER)
-
-		val mainSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topPanel, bottomPanel)
-
-		
-		
-
-		frame.getContentPane().add(mainSplit)
-		*/
-
-		/* Example Swing program
-		val textArea = new JTextArea(10, 40)
-		frame.getContentPane().add(BorderLayout.CENTER, textArea)
-		val button = new JButton("Click")
-		frame.getContentPane().add(BorderLayout.SOUTH, button)
-		button.addActionListener(new ActionListener() {
-			def actionPerformed(e: ActionEvent): Unit = {
-				textArea.append("Button was clicked\n")
-			}
-		})
-		*/
 	
 		frame.setVisible(true)
 	}

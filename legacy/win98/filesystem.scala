@@ -1,3 +1,5 @@
+package filesystemBackend
+
 // Description of Files & Folders
 // Files & Folders must always have a name
 trait Node {
@@ -16,6 +18,11 @@ case class NodeContext(parentName: String, leftnodes: List[Node], rightNodes: Li
 case class Zipper(focus: Node, context: List[NodeContext])
 
 object CommandUtils {
+
+    // constants
+    val minFileSize = 1
+    val maxFileSize = 4194304
+
 
     // To print path in terminal
     def printPath(z: Zipper): String = {
@@ -42,12 +49,184 @@ object CommandUtils {
     def ls(z: Zipper): Unit = {
         z.focus match {
             case Folder(_, children) =>
-                children.foreach {
-                    case Folder(name, _) => println(name)
-                    case File(name, size) => println(name + "    " + size + "KB")
+                val folders: List[Folder] = children.collect { case d: Folder => d}.sortBy(_.name)
+                val files: List[File] = children.collect { case f: File => f}.sortBy(_.name)
+                folders.foreach { folder =>
+                    println("<DIR> " +  folder.name)
+                }
+                
+                files.foreach { file =>
+                    val paddedOutput = "".padTo(6, ' ') + file.name.padTo(12, ' ') + file.size + "KB"
+                    println(paddedOutput)
+                }
+                
+                val totalSize: Int = files.map(_.size).sum
+                println("\n" + folders.size + " DIR(S)")
+                println(files.size + " FILE(S)")
+                println("Total: " + totalSize + " KB")
+            case _ =>
+                None
+        }
+    }
+
+    
+    // command cd 
+    def cd(name: String, z: Zipper): Option[Zipper] = {
+        z.focus match {
+            case Folder(parentName, children) =>
+                val (left, targetAndRight) = children.span(_.name != name)
+                targetAndRight match {
+                    case (target @ Folder(_, _)) :: right =>
+                        Some(Zipper(target, NodeContext(parentName, left, right) :: z.context))
+                    case (target @ File(_, _)) :: _ =>
+                        None
+                    case Nil =>
+                        None
                 }
             case _ =>
                 None
+        }
+    }
+
+    // cd up the chain
+    def cdUp(z: Zipper): Option[Zipper] = {
+        z.context match {
+            case NodeContext(parentName, left, right) :: rest =>
+                val newChildren = left ::: (z.focus :: right)
+                Some(Zipper(Folder(parentName, newChildren), rest))
+            case Nil =>
+                None
+        }
+    }
+
+
+    // update a zipper's focused object
+    def updateFocus(z: Zipper, newFocus: Node): Zipper = {
+        Zipper(newFocus, z.context)
+    }
+
+
+    // command - mkdir
+    def mkDir(name: String, z: Zipper): Zipper = {
+        z.focus match {
+            case Folder(parentName, children) =>
+                if (children.exists(_.name == name)) {
+                    println("'" + name + "' already exists in current folder")
+                    z
+                } else {
+                    if (name.size >= 1  && name.size <= 12) {
+                        val newFolder: Folder = Folder(name)
+                        val newFocus: Folder = Folder(parentName, children :+ newFolder)
+                        updateFocus(z, newFocus)
+                    } else {
+                        println("name must conform to name conventions")
+                        z
+                    }
+                }
+
+            case File(_, _) =>
+                println("'" + name + "' connot contain directories.")
+                z
+        }
+    }
+
+    // command - touch
+    def touch(name: String, size: Int, z: Zipper): Zipper = {
+        z.focus match {
+            case Folder(parentName, children) =>
+                if (children.exists(_.name == name)) {
+                    println("file '" + name + "' already exist")
+                    z
+                } else {
+                    if (name.size >= 1 && name.size <= 12) {
+                        if (size >= minFileSize && size <= maxFileSize) {
+                            val newFile = File(name, size)
+                            val newFocus = Folder(parentName, children :+ newFile)
+                            updateFocus(z, newFocus)
+                        } else {
+                            println("file size be within range (" + maxFileSize + "KB).")
+                            z
+                        }
+                    } else {
+                        println("name must conform to name conventions")
+                        z
+                    }
+                }
+            case File(_, _) =>
+                println("'" + name + "' cannot contain files within it.")
+                z
+        }
+    }
+
+
+
+
+
+
+
+    // the shell function. acts on the zipper. to change the shell, redefinite it with a new zipper.
+    @annotation.tailrec
+    def shell(z: Zipper): Unit = {
+        // input is taken and then split into components
+        val input: String = readLine(printPath(z) + ">").trim.toLowerCase
+        val inputparams: Array[String] = input.split(" ")
+
+        if (inputparams.size >= 1) {
+            inputparams(0) match {
+                case "ls" =>
+                    ls(z)
+                    shell(z)
+                case "cd" =>
+                    if (inputparams.size == 2) {
+                        val target: String = inputparams(1)
+                        if (target == "..") {
+                            cdUp(z) match {
+                                case Some(up) =>
+                                    shell(up)
+                                case None =>
+                                    println("the system connot find the path")
+                                    shell(z)
+                            }
+                        } else {
+                            cd(target, z) match {
+                                case Some(next) =>
+                                    shell(next)
+                                case None =>
+                                    println("system can't locate path.")
+                                    shell(z)
+                            }
+                        }
+                    }
+                case "mkdir" =>
+                    if (inputparams.size == 2) {
+                        val target: String = inputparams(1)
+                        shell(mkDir(target, z))
+                    } else {
+                        println("expected input after mkdir: mkdir <FOLDERNAME>")
+                        shell(z)
+                    }
+                case "touch" =>
+                    if (inputparams.size == 2) {
+                        val target: String = inputparams(1)
+                        shell(touch(target, minFileSize, z))
+                    } else if (inputparams.size == 3) {
+                        val target: String = inputparams(1)
+                        try {
+                            val modifier: Int = inputparams(2).toInt
+                            shell(touch(target, modifier, z))
+                        } catch {
+                            case ex: Exception =>
+                                println("file size must be an integer.")
+                                shell(z)
+                        }
+                    } else {
+                        println("touch expects a maximum of 2 paramters: touch <FILENAME> <FILESIZE>")
+                    }
+                case "kill" =>
+                    println("killed")
+            }
+        } else {
+            shell(z)
         }
     }
 }
@@ -57,34 +236,13 @@ object Main {
     // Content - files and folders
     def main(args: Array[String]): Unit = {
         val fileSystemContent = Folder("home", List (
-            Folder("documents", List(
-                File("cv.pdf"),
-                File("data.dat")
-            )),
-            Folder("downloads", List(
-                Folder("msinstaller", List(
-                    File("instmsia.exe")
-                ))
-            )),
-            Folder("music", List(
-                File("GOLDEN.mp3")
-            )),
-            Folder("photos", List(
-                File("passport.jpg"),
-                File("photoid.png"),
-                Folder("japan2026", List(
-                    File("tokyo.png"),
-                    File("kyoto.png"),
-                    File("miyajima.png")
-                ))
-            )),
-            File("autoexec.bat"),
-            File("config.sys"),
-            File("command.com")
-        ))
-        val zipper = Zipper(fileSystemContent, Nil)
-        println(CommandUtils.printPath(zipper))
-        CommandUtils.ls(zipper)
-        // shell(zipper)
+            Folder("myfolder", List(
+                File("read.txt"))),
+            Folder("testfolder", List(
+                File("testfile.exe"))),
+            File("testfile_display.exe")
+            ))
+            val zipper = Zipper(fileSystemContent, Nil)
+            CommandUtils.shell(zipper)
     }
 }
