@@ -125,6 +125,53 @@ def touch(name: String, size: Int, z: Zipper): Zipper =
             println(s"'$name' cannot contain files within it.")
             z
 
+
+// redefine yhe zipper's focused folder's childtren with one missing a target.
+// function for removing
+def removeChild(z: Zipper, name: String): Zipper = 
+    z.focus match
+        case Folder(parentName, children) =>
+            val newFocus: Folder = Folder(parentName, children.filter(_.name != name))
+            updateFocus(z, newFocus)
+        case File(_, _) =>
+            println(s" '$name' cannot contain files.")
+            z
+
+// command rm - remove a file
+def rm(name: String, z: Zipper): Zipper =
+    z.focus match
+        case Folder(_, children) =>
+            children.find(_.name == name) match
+                case Some(File(_, _)) =>
+                    removeChild(z, name)
+                case Some(Folder(_, _)) =>
+                    println(s"'$name' cannot be removed - it is a directory")
+                    z
+                case None =>
+                    println("the system cannot find the path")
+                    z
+        case File(_, _) =>
+            println(s"'$name' cannot contain files.")
+            z
+
+// command rmdir - remove a folder
+def rmdir(name: String, z: Zipper): Zipper =
+    z.focus match
+        case Folder(_, children) =>
+            children.find(_.name == name) match
+                case Some(Folder(_, _)) =>
+                    removeChild(z, name)
+                case Some(File(_, _)) =>
+                    println(s"'$name' cannot be removed - it is a file.")
+                    z
+                case None =>
+                    println("the system cannot find the path")
+                    z
+        case File(_, _) =>
+            println(s"'$name' cannot contain directories.")
+            z
+
+
 // the shell function. acts on the zipper. to change the shell, redefinite it with a new zipper.
 @annotation.tailrec
 def shell(z: Zipper): Unit = 
@@ -176,6 +223,21 @@ def shell(z: Zipper): Unit =
                             shell(z)
                 else
                     println("touch expects a maximum of 2 paramters: touch <FILENAME> <FILESIZE>")
+                    shell(z)
+            case "rm" =>
+                if inputparams.size == 2 then
+                    val target: String = inputparams(1)
+                    shell(rm(target, z))
+                else
+                    println("'rm' expects 1 parameter(s): rm <FILENAME>")
+                    shell(z)
+            case "rmdir" =>
+                if inputparams.size == 2 then
+                    val target: String = inputparams(1)
+                    shell(rmdir(target, z))
+                else
+                    println("'rmdir' expects 1 parameter(s): rmdir <FOLDERNAME> ")
+
             case "kill" =>
                 println("killed")
     else
