@@ -246,6 +246,7 @@ def shell(z: Zipper): Unit =
                     shell(rmdir(target, z))
                 else
                     println("'rmdir' expects 1 parameter(s): rmdir <FOLDERNAME> ")
+                    shell(z)
 
             case "kill" =>
             // quit the shell by not redefining it
