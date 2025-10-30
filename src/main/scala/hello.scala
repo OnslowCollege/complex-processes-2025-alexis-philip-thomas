@@ -184,9 +184,11 @@ def shell(z: Zipper): Unit =
     if inputparams.size >= 1 then
         inputparams(0) match
             case "ls" =>
+            // show focused node's children, continue the shell with this node
                 ls(z)
                 shell(z)
             case "cd" =>
+            // change the focused node, continue the shell with the new focus if possible
                 if inputparams.size == 2 then
                     val target: String = inputparams(1)
                     if (target == "..") then
@@ -204,6 +206,7 @@ def shell(z: Zipper): Unit =
                                 println("system can't locate path.")
                                 shell(z)
             case "mkdir" =>
+            // redefine the focus to include a new folder in its children, continue the shell with this new focus
                 if inputparams.size == 2 then
                     val target: String = inputparams(1)
                     shell(mkDir(target, z))
@@ -211,11 +214,13 @@ def shell(z: Zipper): Unit =
                     println("expected input after mkdir: mkdir <FOLDERNAME>")
                     shell(z)
             case "touch" =>
+            // redefine the focus to include a new file in its children, continue the shell with this new focus
                 if inputparams.size == 2 then
                     val target: String = inputparams(1)
                     shell(touch(target, minFileSize, z))
                 else if inputparams.size == 3 then
                     val target: String = inputparams(1)
+                    // try to cast the requested file size into an integer
                     val modifier: Try[Int] = Try(inputparams(2).toInt)
                     modifier match
                         case Success(value) =>
@@ -227,6 +232,7 @@ def shell(z: Zipper): Unit =
                     println("touch expects a maximum of 2 paramters: touch <FILENAME> <FILESIZE>")
                     shell(z)
             case "rm" =>
+            // redefine the focus to exclude a file from its children, continue the shell with this new focus
                 if inputparams.size == 2 then
                     val target: String = inputparams(1)
                     shell(rm(target, z))
@@ -234,6 +240,7 @@ def shell(z: Zipper): Unit =
                     println("'rm' expects 1 parameter(s): rm <FILENAME>")
                     shell(z)
             case "rmdir" =>
+            // redefine the focus to exclude a folder from its children, continue the shell with this new focus
                 if inputparams.size == 2 then
                     val target: String = inputparams(1)
                     shell(rmdir(target, z))
@@ -241,6 +248,7 @@ def shell(z: Zipper): Unit =
                     println("'rmdir' expects 1 parameter(s): rmdir <FOLDERNAME> ")
 
             case "kill" =>
+            // quit the shell by not redefining it
                 println("killed")
     else
         shell(z)
