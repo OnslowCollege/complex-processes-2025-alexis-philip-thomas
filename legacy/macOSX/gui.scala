@@ -12,12 +12,12 @@ object MyApp {
 
 	def main(args: Array[String]): Unit = {
 		// Initialise default file system and focus on it.
-		val fileSystemContent = new Folder("home", scala.List (
-            new Folder("myfolder", scala.List(
-                new File("read.txt", 1))),
-            new Folder("testfolder", scala.List(
-                new File("testfile.exe", 1))),
-            new File("testfile_display.exe", 1)
+		val fileSystemContent = Folder("home", scala.List (
+            Folder("myfolder", scala.List(
+                File("read.txt", 1))),
+            Folder("testfolder", scala.List(
+                File("testfile.exe", 1))),
+            File("testfile_display.exe", 1)
             ))
 		state = Zipper(fileSystemContent, Nil)
 
@@ -79,26 +79,99 @@ object MyApp {
 
 				case File(_, _) =>
 					None
-					// inputArea.clear()
 					
 			}
 		}
 
 		reload()
 
-
+		// Command handler.
 		inputArea.addActionListener(new ActionListener() {
 			def actionPerformed(e: ActionEvent): Unit = {
 				val input: String = inputArea.getText.toLowerCase.trim
 				val parts: Array[String] = input.split(" ")
+				// Clear the input field.
+				inputArea.setText("")
 			
 				if (parts.size >= 1) {
 					parts(0) match {
 						case "ls" =>
-							outputArea.append("Refreshed\n")
+							outputArea.append("refreshed.\n")
+						case "cd" =>
+							// Change the focused node. Continue the shell with the new focus if possible.
+							if (parts.size == 2) {
+								val target: String = parts(1)
+								if (target == "..") {
+									cdUp(state) match {
+										case Some(up) =>
+											state = up
+										case None =>
+											outputArea.append("the system cannot find the path specified\n")
+									}
+								} else {
+									cd(target, state) match {
+										case Some(next) =>
+											state = next
+										case None =>
+											outputArea.append("the system cannot find the path specified\n")
+									}
+								}
+							} else {
+								outputArea.append("'cd' expects 1 parameter(s): cd <FOLDERNAME>\n")
+							}
+						case "mkdir" =>
+							// Redefine the focus to include a new folder in its children. Continue the shell with this new focus.
+							if (parts.size == 2) {
+								val target: String = parts(1)
+								state = mkDir(target, state)
+							} else {
+								outputArea.append("'mkdir' epects 1 parameter after command: mkdir <FOLDERNAME>\n")
+							}
+						case "touch" =>
+							// Redefine the focus to include a new file in its children. Continue the shell with this new focus.
+							if (parts.size == 2) {
+								val target: String = parts(1)
+								state = touch(target, minFileSize, state)
+							} else if (parts.size == 3) {
+								val target: String = parts(1)
+								// Try to cast the 2nd parameter (requested file size) to an integer.
+								try {
+									val modifer: Int = parts(2).toInt
+									state = touch(target, modifer, state)
+								} catch {
+									case ex: Exception =>
+										outputArea.append("File must be a number\n")
+								}
+							} else {
+								outputArea.append("'touch' expects a max of two parameters: touch <FILENAME> <FILESIZE>\n")
+							}
+						case "rm" =>
+							// Redefine the focus to exclude a file from its children. Continue the shell with this new focus.
+							if (parts.size == 2) {
+								val target: String = parts(1)
+								state = rm(target, state)
+							} else {
+								outputArea.append("'rm' expects 1 parameter: rm <FILENAME>\n")
+							}
+						case "rmdir" =>
+							// Redefine the focus to exclude a folder from its children. Continue the shell with this new focus.
+							if (parts.size == 2) {
+								val target: String = parts(1)
+								state = rmdir(target, state)
+							} else {
+								outputArea.append("'rmdir' expects 1 parameter: rmdir <FOLDERNAME>\n")
+							}
+						
+						case "kill" =>
+							frame.dispose()
+
+						case _ =>
+						Nil
 					}
+					reload()
 				}
 			}
+
 		})
 	
 		frame.setVisible(true)
