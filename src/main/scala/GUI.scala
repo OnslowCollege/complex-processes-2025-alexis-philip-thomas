@@ -57,8 +57,8 @@ class MyApp extends Application {
         case File(_, _) =>
           None
         
-        // clearing user input filed and changing the windows title to match the folder path.
-        inputArea.clear
+        // clearing user input field and changing the windows title to match the folder path.
+        inputArea.clear()
         mainStage.setTitle(printPath(state))
 
     reload()
@@ -68,6 +68,7 @@ class MyApp extends Application {
       // spliting the users input different parts (command, target and modification) by " ".
       val input: String = inputArea.getText.toLowerCase.trim
       val parts: Array[String] = input.split(" ")
+      outputArea.clear()
       
       if parts.size >= 1 then
         parts(0) match
@@ -91,6 +92,8 @@ class MyApp extends Application {
                     state = next
                   case None =>
                     outputArea.appendText("the system cannot find the path specified")
+            else
+              outputArea.appendText("cd command expects 1 parameter after command: cd <FOLDERNAME")
           case "mkdir" =>
             // redefining the focus that adds the users folder in its list of children.
             if parts.size == 2 then
